@@ -1,36 +1,12 @@
 import streamlit as st
 import pandas as pd
-from sklearn.model_selection import train_test_split
 from sklearn.naive_bayes import MultinomialNB
-from sklearn.metrics import classification_report, confusion_matrix
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.model_selection import train_test_split
 
-
-"""
-# Welcome to Streamlit!
-
-Edit `/streamlit_app.py` to customize this app to your heart's desire :heart:
-
-If you have any questions, checkout our [documentation](https://docs.streamlit.io) and [community
-forums](https://discuss.streamlit.io).
-
-In the meantime, below is an example of what you can do with just a few lines of code:
-"""
-
-
-import string
-def preprocess_text(text):
-    if isinstance(text, str):
-        text = text.lower()
-        text = text.translate(str.maketrans("", "", string.punctuation))
-    return text
-
-def load_and_preprocess_data():
-    # Load the Spambase dataset
-    url = 'https://archive.ics.uci.edu/ml/machine-learning-databases/spambase/spambase.data'
-    column_names = [
-       'word_freq_make', 'word_freq_address', 'word_freq_all', 'word_freq_3d',
+# Load the Spambase dataset
+url = 'https://archive.ics.uci.edu/ml/machine-learning-databases/spambase/spambase.data'
+column_names = [
+    'word_freq_make', 'word_freq_address', 'word_freq_all', 'word_freq_3d',
     'word_freq_our', 'word_freq_over', 'word_freq_remove', 'word_freq_internet',
     'word_freq_order', 'word_freq_mail', 'word_freq_receive', 'word_freq_will',
     'word_freq_people', 'word_freq_report', 'word_freq_addresses', 'word_freq_free',
@@ -45,45 +21,39 @@ def load_and_preprocess_data():
     'char_freq_;', 'char_freq_(', 'char_freq_[', 'char_freq_!', 'char_freq_$',
     'char_freq_#', 'capital_run_length_average', 'capital_run_length_longest',
     'capital_run_length_total', 'label'
-    ]
-    dataset = pd.read_csv(url, header=None, names=column_names)
+]
+data = pd.read_csv(url, header=None, names=column_names)
+X = data.drop('label', axis=1)
+y = data['label']
 
-    # Preprocess the text data (you can customize this step)
-    dataset['processed_email'] = dataset['word_freq_make'].apply(preprocess_text)
+# Split the data into train and test sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-    # Split the data into features (X) and target (y)
-    X = dataset['processed_email']
-    y = dataset['label']
+# Train the classifier
+classifier = MultinomialNB()
+classifier.fit(X_train, y_train)
 
-    return X, y
 
-X_train, y_train = load_and_preprocess_data()
+"""
+# Welcome to Streamlit!
 
-# Fit the TfidfVectorizer on the training data
-vectorizer = TfidfVectorizer()
-X_train_vectorized = vectorizer.fit_transform(X_train)
+Edit `/streamlit_app.py` to customize this app to your heart's desire :heart:
 
-# Train the classifier (you need to implement the train_classifier function)
-classifier = train_classifier(X_train_vectorized, y_train)
+If you have any questions, checkout our [documentation](https://docs.streamlit.io) and [community
+forums](https://discuss.streamlit.io).
 
-def predict_spam_or_ham(email_text, classifier, vectorizer):
-    # Preprocess the email text
-    preprocessed_text = preprocess_text(email_text)
-    # Transform the preprocessed text using the fitted vectorizer
-    vectorized_text = vectorizer.transform([preprocessed_text])
-    # Use the trained classifier to predict
-    prediction = classifier.predict(vectorized_text)[0]
-    return prediction
+In the meantime, below is an example of what you can do with just a few lines of code:
+"""
+
 
 
 def main():
     st.title("Spam Email Detection")
-    email_input = st.text_area("Enter an email:")
+    email_input = st.text_area("Enter numerical attributes for prediction (comma-separated):")
     
     if st.button("Predict"):
-        preprocessed_email = preprocess_text(email_input)
-        vectorized_email = vectorizer.transform([preprocessed_email])
-        prediction = classifier.predict(vectorized_email)[0]
+        attributes = [float(attr) for attr in email_input.split(',')]
+        prediction = classifier.predict([attributes])[0]
         
         if prediction == 0:
             st.write("This email is likely not spam.")
