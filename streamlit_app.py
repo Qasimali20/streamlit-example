@@ -18,10 +18,17 @@ In the meantime, below is an example of what you can do with just a few lines of
 """
 
 
-url = 'https://archive.ics.uci.edu/ml/machine-learning-databases/spambase/spambase.data'
+def preprocess_text(text):
+    # Implement your preprocessing steps here
+    text = text.lower()
+    # For example, lowercasing and removing punctuation
+    return processed_text
 
-column_names = [
-    'word_freq_make', 'word_freq_address', 'word_freq_all', 'word_freq_3d',
+def load_and_preprocess_data():
+    # Load the Spambase dataset
+    url = 'https://archive.ics.uci.edu/ml/machine-learning-databases/spambase/spambase.data'
+    column_names = [
+       'word_freq_make', 'word_freq_address', 'word_freq_all', 'word_freq_3d',
     'word_freq_our', 'word_freq_over', 'word_freq_remove', 'word_freq_internet',
     'word_freq_order', 'word_freq_mail', 'word_freq_receive', 'word_freq_will',
     'word_freq_people', 'word_freq_report', 'word_freq_addresses', 'word_freq_free',
@@ -36,22 +43,25 @@ column_names = [
     'char_freq_;', 'char_freq_(', 'char_freq_[', 'char_freq_!', 'char_freq_$',
     'char_freq_#', 'capital_run_length_average', 'capital_run_length_longest',
     'capital_run_length_total', 'label'
-]
+    ]
+    dataset = pd.read_csv(url, header=None, names=column_names)
 
-dataset = pd.read_csv(url, header=None, names=column_names)
+    # Preprocess the text data (you can customize this step)
+    dataset['processed_email'] = dataset['email'].apply(preprocess_text)
 
-X = dataset.drop('label', axis=1)  # Features
-y = dataset['label'] 
+    # Split the data into features (X) and target (y)
+    X = dataset['processed_email']
+    y = dataset['label']
+
+    return X, y
 
 X_train, y_train = load_and_preprocess_data()
 
-
-# Fit the TfidfVectorizer on training data
+# Fit the TfidfVectorizer on the training data
 vectorizer = TfidfVectorizer()
 X_train_vectorized = vectorizer.fit_transform(X_train)
 
-
-# Initialize the CountVectorizer
+# Train the classifier (you need to implement the train_classifier function)
 classifier = train_classifier(X_train_vectorized, y_train)
 
 def predict_spam_or_ham(email_text, classifier, vectorizer):
@@ -65,18 +75,17 @@ def predict_spam_or_ham(email_text, classifier, vectorizer):
 
 
 def main():
-    st.title("Spam Email Detection App")
-    st.write("Enter an email to check if it's spam or not:")
-
-    # Text input for user to enter email
-    email_input = st.text_area("Email Text")
-
-    if st.button("Check"):
-        if email_input.strip():  # Ensure input is not empty
-            prediction = predict_spam_or_ham(email_input, classifier)
-            result = "Spam" if prediction == 1 else "Ham"
-            st.write(f"Prediction: {result}")
+    st.title("Spam Email Detection")
+    email_input = st.text_area("Enter an email:")
+    
+    if st.button("Predict"):
+        prediction = predict_spam_or_ham(email_input, classifier, vectorizer)
+        if prediction == 0:
+            st.write("This email is likely not spam.")
+        else:
+            st.write("This email is likely spam.")
 
 if __name__ == "__main__":
     main()
+
     
