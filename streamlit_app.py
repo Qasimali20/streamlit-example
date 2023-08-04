@@ -81,7 +81,10 @@ def main():
     email_input = st.text_area("Enter an email:")
     
     if st.button("Predict"):
-        prediction = predict_spam_or_ham(email_input, classifier, vectorizer)
+        preprocessed_email = preprocess_text(email_input)
+        vectorized_email = vectorizer.transform([preprocessed_email])
+        prediction = classifier.predict(vectorized_email)[0]
+        
         if prediction == 0:
             st.write("This email is likely not spam.")
         else:
@@ -89,5 +92,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-
     
