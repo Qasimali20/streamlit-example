@@ -52,13 +52,22 @@ def main():
     email_input = st.text_area("Enter numerical attributes for prediction (comma-separated):")
     
     if st.button("Predict"):
-        attributes = [float(attr) for attr in email_input.split(',')]
-        prediction = classifier.predict([attributes])[0]
-        
-        if prediction == 0:
-            st.write("This email is likely not spam.")
-        else:
-            st.write("This email is likely spam.")
+        try:
+            attributes = [float(attr) for attr in email_input.split(',') if attr.strip()]
+            prediction = classifier.predict([attributes])[0]
+            
+            if prediction == 0:
+                st.write("This email is likely not spam.")
+            else:
+                st.write("This email is likely spam.")
+        except ValueError:
+            st.write("Invalid input. Please enter valid numerical attributes separated by commas.")
+
+
+
+
+
+
 
 if __name__ == "__main__":
     main()
