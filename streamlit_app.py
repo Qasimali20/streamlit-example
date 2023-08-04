@@ -18,11 +18,18 @@ In the meantime, below is an example of what you can do with just a few lines of
 """
 
 
+import string
+
 def preprocess_text(text):
-    # Implement your preprocessing steps here
-    text = text.lower()
-    # For example, lowercasing and removing punctuation
-    return processed_text
+    # Check if text is a string
+    if isinstance(text, str):
+        # Convert to lowercase
+        text = text.lower()
+
+        # Remove punctuation
+        text = text.translate(str.maketrans("", "", string.punctuation))
+    
+    return text
 
 def load_and_preprocess_data():
     # Load the Spambase dataset
