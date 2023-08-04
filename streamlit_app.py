@@ -6,10 +6,10 @@ from sklearn.model_selection import train_test_split
 
 # Sample email data and labels
 sample_data = [
-    ("Get rich quick! Earn $1000s with our amazing offer.", 1),  # Spam
-    ("Hi there, just checking in. How are you?", 0),  # Not spam
-    ("URGENT: Your account needs verification.", 1),  # Spam
-    ("Let's meet for coffee this weekend.", 0),  # Not spam
+    ("Get rich quick! Earn $1000s with our amazing offer.", "Spam"),
+    ("Hi there, just checking in. How are you?", "Not Spam"),
+    ("URGENT: Your account needs verification.", "Spam"),
+    ("Let's meet for coffee this weekend.", "Not Spam"),
 ]
 
 # Create a DataFrame from the sample data
@@ -37,10 +37,7 @@ def main():
         vectorized_email = vectorizer.transform([email_input])
         prediction = classifier.predict(vectorized_email)[0]
 
-        if prediction == 0:
-            st.write("This email is likely not spam.")
-        else:
-            st.write("This email is likely spam.")
+        st.write("Prediction:", prediction)
 
 if __name__ == "__main__":
     main()
