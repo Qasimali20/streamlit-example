@@ -47,7 +47,7 @@ def load_and_preprocess_data():
     dataset = pd.read_csv(url, header=None, names=column_names)
 
     # Preprocess the text data (you can customize this step)
-    dataset['processed_email'] = dataset['email'].apply(preprocess_text)
+    dataset['processed_email'] = dataset['word_freq_make'].apply(preprocess_text)
 
     # Split the data into features (X) and target (y)
     X = dataset['processed_email']
