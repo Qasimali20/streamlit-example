@@ -27,7 +27,7 @@ classifier.fit(X_train_vectorized, data['label'])
 # Streamlit app
 def main():
     st.title("Email Spam Checker")
-    st.image("email_spam_image.jpg", use_column_width=True)
+    #st.image("email_spam_image.jpg", use_column_width=True)
     st.write("Enter an email below to check if it's spam or not:")
 
     # Input field for email text
