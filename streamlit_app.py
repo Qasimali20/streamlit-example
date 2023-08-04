@@ -43,23 +43,23 @@ dataset = pd.read_csv(url, header=None, names=column_names)
 X = dataset.drop('label', axis=1)  # Features
 y = dataset['label'] 
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+X_train, y_train = load_and_preprocess_data()
 
-# Build and train the Multinomial Naive Bayes classifier
-classifier = MultinomialNB()
-classifier.fit(X_train, y_train)
+
+# Fit the TfidfVectorizer on training data
+vectorizer = TfidfVectorizer()
+X_train_vectorized = vectorizer.fit_transform(X_train)
+
 
 # Initialize the CountVectorizer
-vectorizer = CountVectorizer(stop_words='english')
+classifier = train_classifier(X_train_vectorized, y_train)
 
-def predict_spam_or_ham(email_text, classifier):
+def predict_spam_or_ham(email_text, classifier, vectorizer):
     # Preprocess the email text
-    preprocessed_text = email_text.lower()  # Convert to lowercase
-
-    # Perform text vectorization using the CountVectorizer
+    preprocessed_text = preprocess_text(email_text)
+    # Transform the preprocessed text using the fitted vectorizer
     vectorized_text = vectorizer.transform([preprocessed_text])
-
-    # Use the trained classifier to predict if the email is spam or ham
+    # Use the trained classifier to predict
     prediction = classifier.predict(vectorized_text)[0]
     return prediction
 
