@@ -1,8 +1,10 @@
-from collections import namedtuple
-import altair as alt
-import math
-import pandas as pd
 import streamlit as st
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.metrics import classification_report, confusion_matrix
+from sklearn.feature_extraction.text import CountVectorizer
+
 
 """
 # Welcome to Streamlit!
@@ -16,23 +18,65 @@ In the meantime, below is an example of what you can do with just a few lines of
 """
 
 
-with st.echo(code_location='below'):
-    total_points = st.slider("Number of points in spiral", 1, 5000, 2000)
-    num_turns = st.slider("Number of turns in spiral", 1, 100, 9)
+url = 'https://archive.ics.uci.edu/ml/machine-learning-databases/spambase/spambase.data'
 
-    Point = namedtuple('Point', 'x y')
-    data = []
+column_names = [
+    'word_freq_make', 'word_freq_address', 'word_freq_all', 'word_freq_3d',
+    'word_freq_our', 'word_freq_over', 'word_freq_remove', 'word_freq_internet',
+    'word_freq_order', 'word_freq_mail', 'word_freq_receive', 'word_freq_will',
+    'word_freq_people', 'word_freq_report', 'word_freq_addresses', 'word_freq_free',
+    'word_freq_business', 'word_freq_email', 'word_freq_you', 'word_freq_credit',
+    'word_freq_your', 'word_freq_font', 'word_freq_000', 'word_freq_money',
+    'word_freq_hp', 'word_freq_hpl', 'word_freq_george', 'word_freq_650',
+    'word_freq_lab', 'word_freq_labs', 'word_freq_telnet', 'word_freq_857',
+    'word_freq_data', 'word_freq_415', 'word_freq_85', 'word_freq_technology',
+    'word_freq_1999', 'word_freq_parts', 'word_freq_pm', 'word_freq_direct',
+    'word_freq_cs', 'word_freq_meeting', 'word_freq_original', 'word_freq_project',
+    'word_freq_re', 'word_freq_edu', 'word_freq_table', 'word_freq_conference',
+    'char_freq_;', 'char_freq_(', 'char_freq_[', 'char_freq_!', 'char_freq_$',
+    'char_freq_#', 'capital_run_length_average', 'capital_run_length_longest',
+    'capital_run_length_total', 'label'
+]
 
-    points_per_turn = total_points / num_turns
+dataset = pd.read_csv(url, header=None, names=column_names)
 
-    for curr_point_num in range(total_points):
-        curr_turn, i = divmod(curr_point_num, points_per_turn)
-        angle = (curr_turn + 1) * 2 * math.pi * i / points_per_turn
-        radius = curr_point_num / total_points
-        x = radius * math.cos(angle)
-        y = radius * math.sin(angle)
-        data.append(Point(x, y))
+X = dataset.drop('label', axis=1)  # Features
+y = dataset['label'] 
 
-    st.altair_chart(alt.Chart(pd.DataFrame(data), height=500, width=500)
-        .mark_circle(color='#0068c9', opacity=0.5)
-        .encode(x='x:Q', y='y:Q'))
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Build and train the Multinomial Naive Bayes classifier
+classifier = MultinomialNB()
+classifier.fit(X_train, y_train)
+
+# Initialize the CountVectorizer
+vectorizer = CountVectorizer(stop_words='english')
+
+def predict_spam_or_ham(email_text, classifier):
+    # Preprocess the email text
+    preprocessed_text = email_text.lower()  # Convert to lowercase
+
+    # Perform text vectorization using the CountVectorizer
+    vectorized_text = vectorizer.transform([preprocessed_text])
+
+    # Use the trained classifier to predict if the email is spam or ham
+    prediction = classifier.predict(vectorized_text)[0]
+    return prediction
+
+
+def main():
+    st.title("Spam Email Detection App")
+    st.write("Enter an email to check if it's spam or not:")
+
+    # Text input for user to enter email
+    email_input = st.text_area("Email Text")
+
+    if st.button("Check"):
+        if email_input.strip():  # Ensure input is not empty
+            prediction = predict_spam_or_ham(email_input, classifier)
+            result = "Spam" if prediction == 1 else "Ham"
+            st.write(f"Prediction: {result}")
+
+if __name__ == "__main__":
+    main()
+    
