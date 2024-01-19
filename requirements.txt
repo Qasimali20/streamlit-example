@@ -1,5 +1,0 @@
-altair
-streamlit
-scikit-learn
-pandas
-sklearn
